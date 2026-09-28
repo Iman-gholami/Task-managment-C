@@ -1,0 +1,14 @@
+{
+  "name": "cadence-workspace",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Task, SOC shift and workforce management workspace",
+  "scripts": {
+    "start": "python server.py",
+    "test": "node --test tests/render.test.cjs",
+    "test:browser": "node tests/browser.cjs"
+  },
+  "devDependencies": {
+    "playwright": "1.62.1"
+  }
+}
