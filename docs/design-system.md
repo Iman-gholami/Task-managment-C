@@ -75,4 +75,6 @@ The task detail view remains a single information-rich split layout. It does not
 
 ## Validation status
 
-HTTP integration and template-render checks are automated. Browser workflow tests are included. At initial implementation time, Chromium could not be installed in the execution environment because its download returned HTML rather than a browser archive, so visual screenshots and browser interaction results were not claimed. Run the browser suite in a supported environment before accepting visual QA.
+The JavaScript backend passed 14 HTTP, persistence, migration and workbook integration tests, plus four template-render suites against real role-scoped data. The Chromium workflow suite passed on Node.js 24 in GitHub Actions, covering login, persisted tasks/comments, shifts, individual ticket records, Excel downloads, both themes, and 1440/1920/390 px viewports.
+
+Dark and light dashboards, task details and shift screenshots were inspected. Browser screenshots are captured at the top of the document with finite animations completed; modal captures use the viewport. Shift saves preserve keyboard focus when rebuilding the surrounding view. Screenshot artifacts are available with the CI run.
