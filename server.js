@@ -272,7 +272,7 @@ function route(db, req, path, q, data, config) {
     const row = get(`SELECT * FROM ${kind === 'task' ? 'tasks' : 'shifts'} WHERE id=?`, integer(data.object_id, 'Item'));
     need(row, 'Item not found.', 404);
     need(kind === 'task' ? canTask(db, actor, row) : row.user_id === actor.id && row.status === 'Active', 'Access denied.', 403);
-    need(typeof data.content === 'string' && /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(data.content), 'Invalid file content.');
+    need(typeof data.content === 'string' && data.content.length % 4 === 0 && !/[^A-Za-z0-9+/]/.test(data.content.replace(/={1,2}$/, '')), 'Invalid file content.');
     const bytes = Buffer.from(data.content, 'base64'); need(bytes.length > 0 && bytes.length <= 5 * 1024 * 1024, 'Choose a file up to 5 MB.');
     run('INSERT INTO attachments(kind,object_id,slot,name,content,user_id) VALUES(?,?,?,?,?,?)', kind, row.id, text(data.slot, 30), text(data.name, 200), bytes, actor.id);
     return json(201, { ok: true });

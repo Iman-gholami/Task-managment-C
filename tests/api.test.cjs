@@ -136,6 +136,19 @@ test('attachments round trip bytes and enforce parent permissions', async () => 
   assert.deepEqual(r.data, content); assert.match(r.headers.get('content-disposition'), /attachment/);
   assert.equal((await clients.design.request('attachments/' + attachment.id)).status, 403);
 });
+test('the advertised 5 MB upload limit works without regex stack overflow', async () => {
+  const id = await task(), bytes = Buffer.alloc(5 * 1024 * 1024, 0x5a);
+  const upload = { kind: 'task', object_id: id, slot: '', name: 'maximum.bin', content: bytes.toString('base64') };
+  const result = await clients.analyst.request('attachments', 'POST', upload);
+  assert.equal(result.status, 201, JSON.stringify(result.data));
+  const { data: state } = await clients.analyst.request('state');
+  const attachment = state.attachments.find(a => a.object_id === id);
+  const downloaded = await clients.analyst.request('attachments/' + attachment.id);
+  assert.equal(downloaded.data.length, bytes.length);
+  assert.equal(createHash('sha256').update(downloaded.data).digest('hex'), createHash('sha256').update(bytes).digest('hex'));
+  const oversized = Buffer.alloc(5 * 1024 * 1024 + 1).toString('base64');
+  assert.equal((await clients.analyst.request('attachments', 'POST', { ...upload, content: oversized })).status, 400);
+});
 test('Excel export is a ZIP workbook with separate, scoped, formula-safe sheets', async () => {
   await task(clients.analyst, { title: '=HYPERLINK("https://example.com")' });
   const { data: state } = await clients.analyst.request('state');
