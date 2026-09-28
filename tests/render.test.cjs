@@ -10,7 +10,7 @@ const root=path.resolve(__dirname,'..');
 let server,temp,base;
 before(async()=>{
   temp=fs.mkdtempSync(path.join(os.tmpdir(),'cadence-render-'));
-  server=spawn('python',['-u','server.py'],{cwd:root,env:{...process.env,CADENCE_DEMO:'1',CADENCE_DB:path.join(temp,'test.db'),PORT:'0'}});
+  server=spawn(process.execPath,['server.js'],{cwd:root,env:{...process.env,CADENCE_DEMO:'1',CADENCE_DB:path.join(temp,'test.db'),PORT:'0'}});
   // A temporary free port is assigned by asking the server to print its bound address.
   base=await new Promise((resolve,reject)=>{server.stdout.on('data',d=>{const m=d.toString().match(/http:\/\/127.0.0.1:(\d+)/);if(m)resolve(m[0]);});server.on('error',reject);server.on('exit',c=>{if(c)reject(Error('Server failed: '+c));});});
 });

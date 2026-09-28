@@ -11,11 +11,11 @@ const temp=fs.mkdtempSync(path.join(os.tmpdir(),'cadence-browser-'));
 fs.mkdirSync(output,{recursive:true});
 let server,browser,page;
 async function start(){
- server=spawn('python',['-u','server.py'],{cwd:root,env:{...process.env,CADENCE_DEMO:'1',CADENCE_DB:path.join(temp,'browser.db'),PORT:'0'}});
+ server=spawn(process.execPath,['server.js'],{cwd:root,env:{...process.env,CADENCE_DEMO:'1',CADENCE_DB:path.join(temp,'browser.db'),PORT:'0'}});
  return new Promise((resolve,reject)=>{server.stdout.on('data',d=>{const m=d.toString().match(/http:\/\/127.0.0.1:\d+/);if(m)resolve(m[0]);});server.on('error',reject);server.on('exit',c=>{if(c)reject(Error('Server exited: '+c));});});
 }
 async function screenshot(name){await page.screenshot({path:path.join(output,name+'.png'),fullPage:true});}
-async function login(email){await page.locator('[name=email]').fill(email+'@cadence.local');await page.locator('[name=password]').fill('Cadence-demo-2026!');await page.locator('button[type=submit]').click();await page.getByRole('heading',{name:/Good/}).waitFor();}
+async function login(email){await page.locator('[name=email]').fill(email+'@cadence.local');await page.locator('[name=password]').fill('Cadence-demo-2026!');await page.locator('button[type=submit]').click();await page.locator('#main h1').filter({hasText:/Good/}).waitFor();}
 async function nav(name){await page.locator(`.sidebar [data-nav="${name}"]`).click();}
 async function change(locator,value){const response=page.waitForResponse(r=>r.url().includes('/api/')&&r.request().method()==='PATCH');await locator.selectOption(value);assert.equal((await response).status(),200);await page.waitForResponse(r=>r.url().endsWith('/api/state'));}
 (async()=>{

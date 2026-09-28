@@ -2,7 +2,7 @@
 
 ## Runtime
 
-Cadence serves a same-origin JavaScript application and a JSON API using Python’s standard HTTP server. SQLite persists data. The frontend loads an authorized workspace snapshot after login and after mutations. Navigation and filters operate on that snapshot; mutations are validated again by the server. This avoids a build chain for a small internal MVP. Workspaces with large datasets should move filtering/pagination to API queries before scaling.
+Cadence serves a same-origin JavaScript application and a JSON API using Node.js 24’s built-in `node:http` server. SQLite persists data through `node:sqlite`; `node:crypto` handles credentials and sessions; `node:zlib` compresses Excel workbooks. The backend and tests have no runtime dependencies on Python or native package builds. The frontend loads an authorized workspace snapshot after login and after mutations. Navigation and filters operate on that snapshot; mutations are validated again by the server. This avoids a build chain for a small internal MVP. Workspaces with large datasets should move filtering/pagination to API queries before scaling.
 
 The app is English and desktop-first. Calendar defaults follow Asia/Tehran (+03:30); timestamps are UTC and displayed using the browser’s locale. Explicit date controls use ISO calendar dates. No timezone-sensitive calculations rely on parsing a bare date as midnight UTC.
 
@@ -38,7 +38,7 @@ Names and team identities are available for attributing comments and work; assig
 - Routine completion is checked activities divided by eight times the number of recorded shifts. Missing shift days are not silently treated as completed or scheduled days.
 - Daily traffic report count means the report activity was marked done. Attachments are optional and can be inspected in the shift.
 - Ticket count is the length of the ticket records, never an editable aggregate. Ticket numbers must be nonempty and unique within a shift (case-insensitive).
-- XLSX files are OOXML ZIP packages, not renamed CSV. All user-authored values are inline string cells, so leading `=`, `+`, `-`, or `@` cannot become spreadsheet formulas. Tasks and routine work are separate sheets and counts.
+- XLSX files are OOXML ZIP packages, not renamed CSV. User-authored text uses inline string cells; counts and hours use numeric cells, so leading `=`, `+`, `-`, or `@` cannot become spreadsheet formulas. Tasks and routine work are separate sheets and counts.
 - The completion chart displays counts in four week buckets for the current month; days after the 21st use the final bucket.
 
 ## Request and file handling
@@ -51,6 +51,12 @@ Attachments are limited to 5 MB and stored as bytes, never executed. Downloads u
 
 The default listener is loopback. A production installation needs a service supervisor, an HTTPS gateway on the same origin, database backups, storage monitoring, identity integration or password reset/change flows, and review of concurrency and auditing requirements. The embedded server does not provide TLS termination. No deployment or external integration is created automatically by this repository.
 
-There is no background polling: reload to pick up another browser’s changes. SQLite serializes writes, and client shift saves are queued. There is no optimistic-version conflict detection across multiple devices; the last accepted save wins. Add version checks for a production multi-device workflow.
+There is no background polling: reload to pick up another browser’s changes. SQLite runs in WAL mode with foreign keys and a five-second busy timeout. Mutations are atomic transactions, processed synchronously after request bodies are collected; client shift saves are queued. There is no optimistic-version conflict detection across multiple devices; the last accepted save wins. Add version checks for a production multi-device workflow.
 
 Schema initialization is idempotent. The work-team column migration preserves earlier development databases. Do not set demo mode on a production dataset or publish the database.
+
+## Runtime migration
+
+The Node.js implementation preserves the earlier SQLite tables and PBKDF2 password encoding (UTF-8 hexadecimal salt, 260,000 SHA-256 iterations). Session expiry accepts both the earlier `+00:00` timestamps and Node’s ISO `Z` timestamps. A regression test creates a legacy schema, inserts a password hash produced by the original runtime and a legacy session, restarts the JavaScript app, then verifies login, record retention, session access, and the work-team migration.
+
+Stop the previous process before running Node against its database. Use Node.js 24 or later; older Node releases without `node:sqlite` are unsupported. API routes, response shapes, cookies, and frontend entry points remain unchanged.

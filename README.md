@@ -6,17 +6,17 @@ This is a runnable MVP, not just a set of mockups. It deliberately excludes SIEM
 
 ## Run locally
 
-Requires **Python 3.10+**. The application has no runtime package dependencies and no build step.
+Requires **Node.js 24+**. The application is JavaScript end to end, uses Node’s built-in SQLite module, and has no runtime package dependencies or build step. `npm install` is only needed for optional browser tests.
 
 ```bash
 # macOS / Linux — sample workspace
-CADENCE_DEMO=1 python server.py
+CADENCE_DEMO=1 npm start
 ```
 
 ```powershell
 # Windows PowerShell
 $env:CADENCE_DEMO = "1"
-python server.py
+npm start
 ```
 
 Open **http://127.0.0.1:8000**.
@@ -39,7 +39,7 @@ Use a **new database path**. Initialization never overwrites existing accounts o
 ```bash
 CADENCE_DB=./data/internal.db \
 CADENCE_ADMIN_PASSWORD='choose-a-unique-password-of-at-least-12-characters' \
-python server.py
+npm start
 ```
 
 The initial account is `iman@cadence.local`. Add employees from **Administration**. Set a unique initial password for each employee and deliver it through your organization’s existing secure channel.
@@ -70,14 +70,13 @@ Changing `CADENCE_DEMO` or `CADENCE_ADMIN_PASSWORD` does **not** change an exist
 
 ## Tests
 
-The API and template tests use only Python and Node.js standard libraries:
+The API and template tests use only Node.js standard libraries:
 
 ```bash
-python -m unittest discover -s tests -v
-node --test tests/render.test.cjs
+npm test
 ```
 
-The API suite uses an isolated temporary database and an ephemeral HTTP port. The template suite checks all core views against real role-scoped API data, including empty data and escaped content. It is **not** a browser or visual test.
+The API suite uses isolated SQLite databases and ephemeral HTTP ports. It also checks migration from the earlier database schema, compatibility with existing password hashes and session timestamps, login throttling, and workbook structure. The template suite checks all core views against real role-scoped API data, including empty data and escaped content. It is **not** a browser or visual test.
 
 Optional browser workflow tests:
 
@@ -89,14 +88,21 @@ npm run test:browser
 
 They exercise login, navigation, task creation/persistence, comments, shift completion, ticket validation, downloads, and both themes. They capture screenshots in `test-results/`. Browser tests need Chromium to be installed. GitHub Actions runs the same suites and uploads screenshots on failures.
 
+## Migrating from the initial version
+
+Keep your existing `data/cadence.db` (or `CADENCE_DB` path), stop the old server, and run `npm start` with Node.js 24+. Existing users, passwords, sessions, tasks, shifts, comments, and attachments use the same SQLite schema and remain readable. Initialization adds a missing work-team column without resetting records. Back up the SQLite database before switching runtimes. No Python installation is required.
+
 ## Structure
 
 ```text
-server.py                 HTTP API, authorization, SQLite, attachments, OOXML export
+server.js                 Node.js HTTP API, authorization, attachments and reporting
+lib/database.js           SQLite schema, migrations and sample data
+lib/domain.js             Validation, roles, dates and password compatibility
+lib/xlsx.js               Real OOXML/ZIP workbook generation
 static/index.html         Application entry and skeleton
 static/app.js             Reusable UI renderers and event-driven interactions
 static/styles.css         Semantic tokens, both themes, responsive layouts
-tests/test_api.py        HTTP integration tests
+tests/api.test.cjs       HTTP, persistence and migration integration tests
 tests/render.test.cjs    Template/render contract tests
 tests/browser.cjs        Browser workflow tests
 docs/design-system.md    Tokens, components, and screen specifications
@@ -107,6 +113,6 @@ See [the design specification](docs/design-system.md) and [architecture / deploy
 
 ## Operational boundary
 
-The built-in HTTP server is intended for local use and controlled internal evaluation. Before a production rollout, provide HTTPS and a suitable application gateway, organizational identity/SSO or password lifecycle management, backups, deployment monitoring, and the organization’s security review. The MVP does not claim production-scale concurrency, immutable compliance auditing, MFA, or automated password recovery.
+The Node.js HTTP server is intended for local use and controlled internal evaluation. Before a production rollout, provide HTTPS and a suitable application gateway, organizational identity/SSO or password lifecycle management, backups, deployment monitoring, and the organization’s security review. The MVP does not claim production-scale concurrency, immutable compliance auditing, MFA, or automated password recovery.
 
 No real external systems are integrated. Files are stored in the local database with a 5 MB per-file limit and served as downloads. No data is sent to third-party analytics or font services.
