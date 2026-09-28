@@ -1,0 +1,11 @@
+data/
+__pycache__/
+*.pyc
+.venv/
+.env
+node_modules/
+test-results/
+playwright-report/
+*.db
+*.db-shm
+*.db-wal
