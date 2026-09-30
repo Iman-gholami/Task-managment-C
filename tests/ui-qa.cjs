@@ -129,6 +129,12 @@ async function contactSheets() {
     const origin = await firstTask.getAttribute('data-action');
     await firstTask.click();
     assert.equal(await page.locator('#app').evaluate(el => el.inert), true);
+    await page.locator('#comment-form textarea').fill('Draft retained while inspecting properties');
+    await page.locator('.modal [data-task-priority]').focus();
+    await saveChange(() => page.locator('.modal [data-task-priority]').selectOption('High'));
+    await page.waitForFunction(() => document.activeElement?.hasAttribute('data-task-priority'));
+    assert.equal(await page.locator('#comment-form textarea').inputValue(), 'Draft retained while inspecting properties');
+
     await page.locator('[data-action^="edit-description:"]').click();
     await page.keyboard.press('Escape');
     await page.locator('.detail-modal').waitFor();
@@ -174,6 +180,16 @@ async function contactSheets() {
         for (const [name, open] of screens) { await open(); await inspect(name, theme, width); }
       }
     }
+    // Mobile sorting remains usable when the table header is visually collapsed.
+    await nav('tasks');
+    await page.locator('#task-sort').selectOption('hours');
+    assert.equal(await page.locator('th:has([data-sort=title])').getAttribute('aria-sort'), 'none');
+    await page.locator('[data-action=sort-direction]').click();
+    await page.locator('#task-sort').selectOption('deadline');
+    await nav('shifts');
+    await page.locator('[data-action="shift-section:context"]').click();
+    assert.equal(await page.evaluate(() => document.activeElement?.classList.contains('continuity-panel')), true);
+
     // Analyst: recorded issue/note, read/write scope, review submission, and mobile account access.
     await logout(); await login('arman');
     assert.equal(await page.locator('[data-nav=admin]').count(), 0);

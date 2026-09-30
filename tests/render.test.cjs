@@ -33,3 +33,20 @@ for(const [role,email] of [['Security Manager','iman'],['SOC Manager','sara'],['
  h.run('route="shifts";activeShift=S.shifts[0]?.id;render()');assert.ok(!h.nodes['#main'].innerHTML.includes('We couldn’t load this view.'));
 });
 test('User content is escaped and empty screens remain actionable',async()=>{const fixture=await state('iman'),h=harness(fixture);h.run('S.tasks[0].title="<img src=x onerror=alert(1)>";taskDetail(S.tasks[0].id)');assert.ok(h.nodes['#overlay'].innerHTML.includes('&lt;img'));assert.ok(!h.nodes['#overlay'].innerHTML.includes('<img src=x'));h.run('S.tasks=[];S.shifts=[];route="tasks/all";render()');assert.ok(h.nodes['#main'].innerHTML.includes('You’re all caught up.'));h.run('route="performance";render()');assert.ok(h.nodes['#main'].innerHTML.includes('No activity was found'));});
+
+test('Task sorting handles numbers, priority ranks and missing dates',async()=>{
+ const h=harness(await state('iman'));
+ h.run(`route='tasks/all';const base=S.tasks[0];S.tasks=[
+  {...base,id:101,title:'Two hours',hours:2,priority:'Critical',deadline:''},
+  {...base,id:102,title:'Ten hours',hours:10,priority:'Low',deadline:'2026-09-20'},
+  {...base,id:103,title:'No hours',hours:0,priority:'High',deadline:'2026-09-25'}
+ ];taskFilter=defaultTaskFilter();taskFilter.sort='hours';`);
+ assert.equal(h.run('filteredTasks().map(t=>t.id).join()'),'103,101,102');
+ h.run("taskFilter.sort='priority';taskFilter.direction=-1");
+ assert.equal(h.run('filteredTasks().map(t=>t.id).join()'),'101,103,102');
+ h.run("taskFilter.sort='deadline'");
+ assert.equal(h.run('filteredTasks().map(t=>t.id).join()'),'103,102,101');
+ h.run("taskFilter.q='no match';render()");
+ assert.ok(h.nodes['#main'].innerHTML.includes('No tasks match these filters.'));
+ assert.ok(h.nodes['#main'].innerHTML.includes('Clear filters'));
+});
