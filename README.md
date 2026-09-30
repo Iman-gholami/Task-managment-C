@@ -66,7 +66,7 @@ Changing `CADENCE_DEMO` or `CADENCE_ADMIN_PASSWORD` does **not** change an exist
 - **Performance:** month/previous month/quarter/custom periods; individual profiles; task work separated from routine activity; quality, complexity distribution, hours, IOC counts, daily reports, and ticket-number drill-downs. Employees are listed alphabetically, without public rankings.
 - **Reports:** employee monthly, team monthly, tasks, shift activity, and tickets; date/employee/team/status/complexity/quality filters as relevant. Real `.xlsx` workbooks contain separate task, routine, and ticket worksheets. Ticket search is preserved in ticket exports.
 - **Administration:** create employees and update roles/primary teams. Only a Security Manager can use these endpoints.
-- **Shared UI:** collapsible navigation, dark/light themes, command search (`⌘K` / `Ctrl+K`), compact contextual notifications, skeleton startup, empty/error states, toasts, semantic controls, visible focus, modal focus trapping, and reduced-motion support.
+- **Shared UI:** independently designed dark/light themes, a compact navigation rail with account access, operational attention queues, scoped task-view memory, contextual task drawers, responsive labelled tables, and shift continuity from recorded issues/notes. Search (`⌘K` / `Ctrl+K`) covers tasks, people, shifts and reports with arrow/Enter navigation; `N` opens task creation. Native controls, visible focus, inert modal backgrounds, retained drafts, request feedback and reduced motion support keyboard workflows.
 
 ## Tests
 
@@ -84,9 +84,10 @@ Optional browser workflow tests:
 npm install
 npx playwright install chromium
 npm run test:browser
+npm run test:ui
 ```
 
-They exercise login, navigation, task creation/persistence, comments, shift completion, ticket validation, downloads, and both themes. They capture screenshots in `test-results/`. Browser tests need Chromium to be installed. GitHub Actions runs the same suites and uploads screenshots on failures.
+The workflow suite exercises login, navigation, task creation/persistence, comments, shift completion, tickets, downloads and both themes. The UI suite verifies retained filters, sorting, keyboard navigation, drawer focus and draft preservation, analyst issue/note recording and manager review. It captures 130 screen/theme/viewport combinations at 1440, 1280, 1024, 768 and 390 pixels, and checks control labels, text size, token contrast and horizontal overflow. Screenshots, contact sheets and audit results are in `test-results/`. Browser tests require Chromium. GitHub Actions runs all suites and uploads their artifacts on success or failure.
 
 ## Migrating from the initial version
 
@@ -105,7 +106,9 @@ static/styles.css         Semantic tokens, both themes, responsive layouts
 tests/api.test.cjs       HTTP, persistence and migration integration tests
 tests/render.test.cjs    Template/render contract tests
 tests/browser.cjs        Browser workflow tests
+tests/ui-qa.cjs          Responsive, theme, accessibility and keyboard regression checks
 docs/design-system.md    Tokens, components, and screen specifications
+docs/ui-refinement.md    Architecture audit, UI changes and verification record
 docs/architecture.md     Data, permissions, reporting semantics, deployment limits
 ```
 

@@ -31,4 +31,16 @@ Shared callsites reviewed: `metrics` (dashboard/performance), `status` (tasks/sh
 
 ## Verification record
 
-Recorded after implementation: API and render contract tests, real Chromium workflows, keyboard/focus behavior, and screenshots of each major screen in both themes at 1440, 1280, 1024, 768 and 390 pixels. Automated checks complement visual review; they are not a claim of a complete WCAG certification.
+Verified implementation: `39058f03cfbd3a631c1f7407dc098fd28709dc5b`.
+
+- All 20 Node API/render tests passed, including numeric and priority sorting with missing values.
+- The existing Chromium workflow suite passed: task/checklist/comment persistence, shift completion, ticket records and Excel download.
+- The UI suite passed across 130 screen/theme/viewport combinations: 13 screens, two themes and five widths (1440, 1280, 1024, 768, 390). It reported no runtime errors, horizontal page overflow, unnamed visible controls, hidden attention-row status/deadline labels or sampled UI text below 12 px.
+- Text and semantic-color tokens passed 4.5:1 contrast checks on the three main surfaces in both themes. Keyboard search, scoped view retention, nested drawer cancellation, property focus, comment draft preservation, mobile sorting and shift-section navigation passed.
+- Analyst issue/note recording and task review submission, followed by SOC manager approval and reload persistence, passed against the real server.
+- Contact sheets for all widths/themes and individual desktop/mobile details were visually reviewed. Review corrections included tighter dashboard rows, immediate dialog focus, readable mobile filters, a default task table that fits tablet width, and direct access to shift context.
+- `server.js` and all files in `lib/` are byte-for-byte unchanged from the pre-refinement baseline. No runtime dependency was added.
+
+[Successful CI run and screenshot artifacts](https://github.com/Iman-gholami/Task-managment-C/actions/runs/36698784309).
+
+Automated checks complement visual review; they are not a claim of a complete WCAG certification. Shift staffing schedules, live presence and independent handover/issue-resolution records remain outside the actual model; the interface labels the available recorded context accordingly.

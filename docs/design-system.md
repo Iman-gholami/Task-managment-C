@@ -81,7 +81,7 @@ The task detail drawer retains one continuous split layout. The dashboard has fi
 
 Shift counts describe logs from SOC members in the current access scope. They are not staffing expectations or live presence. Continuity surfaces existing issue summaries, open assigned tasks, and notes/issues from the same analyst’s previous log. It does not invent an independent handover or issue-resolution workflow.
 
-Each task scope remembers its search, filters, sorting, pagination and scroll position during the session. Status/priority filtering is visible and clearable; numeric values and enums sort semantically in both directions with `aria-sort`. Empty values sort last. A blank footer no longer claims every change is saved: it shows the last refresh, pending request or failure.
+Each task scope remembers its search, filters, sorting, pagination and scroll position during the session. The default columns prioritize title, status, priority, assignee and due date; complexity, hours and quality remain available through Columns. Status/priority filtering is visible and clearable; numeric values and enums sort semantically in both directions with `aria-sort`. Mobile provides native sort and direction controls when table headings collapse into labelled records. Empty values sort last. The footer shows the last refresh, pending request or failure instead of claiming every change is saved.
 
 Light mode uses independent surface and text values. The existing icon paths, native form controls, API requests and server-side business rules are preserved.
 
