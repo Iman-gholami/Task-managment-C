@@ -214,7 +214,7 @@ async function contactSheets() {
     assert.deepEqual(failures, [], 'Responsive/label/readability checks');
     console.log(`PASS: ${results.length} screen/theme/viewport combinations, token contrast, keyboard context, analyst and manager workflows.`);
   } catch (error) {
-    fs.writeFileSync(path.join(output, 'partial-audit.json'), JSON.stringify({ errors, results }, null, 2));
+    fs.writeFileSync(path.join(output, 'partial-audit.json'), JSON.stringify({ failure: error.stack, errors, results }, null, 2));
     if (page) await page.screenshot({ path: path.join(output, 'failure.png'), animations: 'disabled' }).catch(() => {});
     console.error(error); process.exitCode = 1;
   } finally {

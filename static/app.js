@@ -92,7 +92,7 @@ function openOverlay(html,cls='',label='Dialog'){
   const existing=$('.modal'),same=existing?.classList?.contains?.(cls),restore=same?preserveFocus($('#overlay')):null,scroll=existing?.scrollTop||0;
   $('#overlay').innerHTML=`<div class="scrim ${cls==='detail-modal'?'drawer-scrim':''}"><section class="modal ${cls}" role="dialog" aria-modal="true" aria-label="${esc(label)}" tabindex="-1">${html}</section></div>`;
   $('#app').inert=true;enhanceTables($('#overlay'));document.body.classList.add('modal-open');
-  requestAnimationFrame(()=>{if(restore){restore();$('.modal').scrollTop=scroll;return;}const target=$('.modal [autofocus]')||$('.modal input:not([disabled]),.modal button,.modal select:not([disabled])')||$('.modal');target?.focus({preventScroll:true});});
+  if(restore){restore();$('.modal').scrollTop=scroll;}else{const target=$('.modal [autofocus]')||$('.modal input:not([disabled]),.modal button,.modal select:not([disabled])')||$('.modal');target?.focus({preventScroll:true});}
 }
 function closeOverlay(force=false){
   if(returnTask&&!force){const id=returnTask;returnTask=null;taskDetail(id);return;}
