@@ -16,7 +16,7 @@ before(async()=>{
 });
 after(()=>{server?.kill();if(temp)fs.rmSync(temp,{recursive:true,force:true});});
 async function state(email){const r=await fetch(base+'/api/login',{method:'POST',headers:{'Content-Type':'application/json','X-Cadence-Request':'1'},body:JSON.stringify({email:email+'@cadence.local',password:'Cadence-demo-2026!'})});assert.equal(r.status,200);const cookie=r.headers.get('set-cookie').split(';')[0];return (await fetch(base+'/api/state',{headers:{Cookie:cookie}})).json();}
-function harness(fixture){const nodes={};const node=()=>({innerHTML:'',className:'',focus(){},classList:{add(){},remove(){}}});const document={documentElement:{dataset:{}},body:node(),activeElement:node(),querySelector:q=>nodes[q]??=node(),querySelectorAll:()=>[],addEventListener(){}};
+function harness(fixture){const nodes={};const node=()=>({innerHTML:'',className:'',focus(){},querySelectorAll:()=>[],classList:{add(){},remove(){}}});const document={documentElement:{dataset:{}},body:node(),activeElement:node(),querySelector:q=>nodes[q]??=node(),querySelectorAll:()=>[],addEventListener(){}};
  const context=vm.createContext({fixture,document,location:{hash:'',reload(){}},window:{addEventListener(){}},localStorage:{getItem(){return null},setItem(){}},console,Date,URLSearchParams,structuredClone,requestAnimationFrame:f=>f(),setTimeout,clearTimeout});
  const source=fs.readFileSync(path.join(root,'static/app.js'),'utf8');vm.runInContext(source.slice(0,source.lastIndexOf('(async()=>')),context);vm.runInContext('S=fixture;setRange();',context);return {context,nodes,run:code=>vm.runInContext(code,context)};
 }
